@@ -89,7 +89,7 @@
             throw new Error("LTIK not found in URL");
           }
           // Send the score to the server
-          const response = await fetch(`/?ltik=${ltik}`, {
+          const response = await fetch(`/grade?ltik=${ltik}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
@@ -1698,7 +1698,9 @@
               RTthirtytwo1 = a1 > 0 ? Math.round(b1 / a1) : 0;
               var a32 = a;
               var a321 = a1;
+              console.log(RTfour);
               sendScore(Math.max(RTfour, RTeight));
+              
               // console.log(
               //   "RTfour = ",
               //   RTfour,
@@ -1939,20 +1941,6 @@
         psy_set_coordinate_system("c");
       }
       function main() {
-        const ltik =
-        new URLSearchParams(window.location.search).get("ltik") ||
-        sessionStorage.getItem("ltik");
-      if (!ltik) {
-        // Try to get ltik from sessionStorage if available
-        const sessionLtik = sessionStorage.getItem("ltik");
-        if (sessionLtik) {
-          window.location.search = `?ltik=${sessionLtik}`;
-          return;
-        }
-      } else {
-        // Store ltik in sessionStorage for future navigation
-        sessionStorage.setItem("ltik", ltik);
-      }
         c.focus();
         psy_screen_width = window.innerWidth;
         psy_screen_height = window.innerHeight;
