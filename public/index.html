@@ -85,6 +85,7 @@
           const urlParams = new URLSearchParams(window.location.search);
           const ltik = urlParams.get("ltik");
           console.log("LTIK:", ltik);
+          console.log(score)
           if (!ltik) {
             throw new Error("LTIK not found in URL");
           }
