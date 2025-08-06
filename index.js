@@ -46,6 +46,11 @@ lti.app.post('/grade', async (req, res) => {
     const idtoken = res.locals.token // IdToken
     const score = req.body.grade // User numeric score sent in the body
     // Creating Grade object
+    console.log('🔹 Incoming score:', score);
+    console.log('🔹 idtoken.user:', idtoken.user);
+    console.log('🔹 resourceLinkId:', idtoken.platformContext.resource.id);
+    console.log('🔹 Existing lineitem in idtoken:', idtoken.platformContext.endpoint.lineitem);
+
     const gradeObj = {
       userId: idtoken.user,
       scoreGiven: score,
