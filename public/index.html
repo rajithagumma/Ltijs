@@ -89,7 +89,7 @@
             throw new Error("LTIK not found in URL");
           }
           // Send the score to the server
-          const response = await fetch(`/grade?ltik=${ltik}`, {
+          const response = await fetch(`/?ltik=${ltik}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
