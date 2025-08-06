@@ -79,6 +79,20 @@
       src="http://psytoolkit.gla.ac.uk/loading.gif"
     /><br />
     <script>
+      const ltik =
+        new URLSearchParams(window.location.search).get("ltik") ||
+        sessionStorage.getItem("ltik");
+      if (!ltik) {
+        // Try to get ltik from sessionStorage if available
+        const sessionLtik = sessionStorage.getItem("ltik");
+        if (sessionLtik) {
+          window.location.search = `?ltik=${sessionLtik}`;
+          return;
+        }
+      } else {
+        // Store ltik in sessionStorage for future navigation
+        sessionStorage.setItem("ltik", ltik);
+      }
       async function sendScore(score) {
         try {
           // Get ltik from URL (if present)
