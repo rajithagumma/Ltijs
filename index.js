@@ -41,9 +41,28 @@ lti.onConnect((token, req, res) => {
   res.sendFile(path.join(__dirname, "./public/index.html"));
 });
 
+// 3. Deploy the provider first — this must come before registering platforms!
+await lti.deploy({ port: 3000 });
+
+// 4. Add custom routes AFTER deployment
 lti.app.post('/grade', async (req, res) => {
   try {
-    const idtoken = res.locals.token // IdToken
+    // Get LTIK from query parameter and validate it
+    const ltik = req.query.ltik;
+    console.log('🔹 Received LTIK:', ltik);
+    
+    if (!ltik) {
+      return res.status(400).send({ error: 'LTIK is required' });
+    }
+    
+    // Get the token using the LTIK
+    const idtoken = await lti.getToken(ltik);
+    console.log('🔹 Retrieved token:', idtoken ? 'Success' : 'Failed');
+    
+    if (!idtoken) {
+      return res.status(400).send({ error: 'Invalid LTIK or token expired' });
+    }
+    
     const score = req.body.grade // User numeric score sent in the body
     // Creating Grade object
     console.log('🔹 Incoming score:', score);
@@ -82,9 +101,7 @@ lti.app.post('/grade', async (req, res) => {
     const responseGrade = await lti.Grade.submitScore(idtoken, lineItemId, gradeObj)
     return res.send(responseGrade)
   } catch (err) {
+    console.error('Error in /grade route:', err);
     return res.status(500).send({ err: err.message })
   }
-})
-
-// 3. Deploy the provider first — this must come before registering platforms!
-await lti.deploy({ port: 3000 });
+});
