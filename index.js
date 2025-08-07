@@ -67,7 +67,7 @@ lti.app.post('/grade', lti.middleware , async (req, res) => {
     const gradeObj = {
       userId: idtoken.user,
       scoreGiven: score,
-      scoreMaximum: 100,
+      scoreMaximum: 10000,
       activityProgress: 'Completed',
       gradingProgress: 'FullyGraded'
     }
