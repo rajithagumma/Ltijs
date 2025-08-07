@@ -42,20 +42,28 @@ lti.onConnect((token, req, res) => {
 });
 
 // 3. Add custom routes BEFORE deployment
-const app = await lti.deploy({ port: 3000 }) // ✅ assign app
-
-app.post('/grade', lti.middleware(), async (req, res) => { // ✅ add ()
+lti.app.post('/grade',  lti.middleware, async (req, res) => {
   try {
     console.log('🔹 Grade route hit');
     console.log('🔹 Request body:', req.body);
     
-    const idtoken = res.locals.token;
-    const score = req.body.grade;
-
-    if (!idtoken || score == null) {
-      return res.status(400).send({ error: 'Missing token or grade' });
+    const idtoken = res.locals.token // IdToken provided by ltijs middleware
+    const score = req.body.grade // User numeric score sent in the body
+    
+    console.log('🔹 Incoming score:', score);
+    console.log('🔹 idtoken.user:', idtoken?.user);
+    
+    if (!idtoken) {
+      console.log('❌ No token in res.locals');
+      return res.status(400).send({ error: 'Invalid LTI session' });
     }
-
+    
+    if (score === undefined || score === null) {
+      console.log('❌ No score provided');
+      return res.status(400).send({ error: 'Grade is required' });
+    }
+    
+    // Creating Grade object
     const gradeObj = {
       userId: idtoken.user,
       scoreGiven: score,
@@ -64,28 +72,44 @@ app.post('/grade', lti.middleware(), async (req, res) => { // ✅ add ()
       gradingProgress: 'FullyGraded'
     }
 
-    let lineItemId = idtoken.platformContext.endpoint.lineitem;
+    // Selecting linetItem ID
+    let lineItemId = idtoken.platformContext.endpoint.lineitem // Attempting to retrieve it from idtoken
     if (!lineItemId) {
-      const response = await lti.Grade.getLineItems(idtoken, { resourceLinkId: true });
-      const lineItems = response.lineItems;
+      console.log('🔹 No existing lineitem, fetching or creating...');
+      const response = await lti.Grade.getLineItems(idtoken, { resourceLinkId: true })
+      const lineItems = response.lineItems
       if (lineItems.length === 0) {
+        // Creating line item if there is none
+        console.log('🔹 Creating new line item')
         const newLineItem = {
           scoreMaximum: 100,
           label: 'Grade',
           tag: 'grade',
           resourceLinkId: idtoken.platformContext.resource.id
         }
-        const lineItem = await lti.Grade.createLineItem(idtoken, newLineItem);
-        lineItemId = lineItem.id;
+        const lineItem = await lti.Grade.createLineItem(idtoken, newLineItem)
+        lineItemId = lineItem.id
+        console.log('🔹 Created new lineitem with ID:', lineItemId);
       } else {
-        lineItemId = lineItems[0].id;
+        lineItemId = lineItems[0].id
+        console.log('🔹 Using existing lineitem with ID:', lineItemId);
       }
+    } else {
+      console.log('🔹 Using lineitem from token:', lineItemId);
     }
 
-    const responseGrade = await lti.Grade.submitScore(idtoken, lineItemId, gradeObj);
-    return res.send(responseGrade);
+    // Sending Grade
+    console.log('🔹 Submitting score...');
+    const responseGrade = await lti.Grade.submitScore(idtoken, lineItemId, gradeObj)
+    console.log('🔹 Grade submitted successfully:', responseGrade);
+    return res.send(responseGrade)
   } catch (err) {
     console.error('❌ Error in /grade route:', err);
-    return res.status(500).send({ error: err.message });
+    console.error('❌ STACK TRACE:', err.stack);
+    return res.status(500).send({ error: err.message, stack: err.stack });
+    // return res.status(500).send({ err: err.message })
   }
-});
+})
+
+// 4. Deploy the provider AFTER defining routes
+await lti.deploy({ port: 3000 });
