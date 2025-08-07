@@ -105,7 +105,9 @@ lti.app.post('/grade',  lti.middleware, async (req, res) => {
     return res.send(responseGrade)
   } catch (err) {
     console.error('❌ Error in /grade route:', err);
-    return res.status(500).send({ err: err.message })
+    console.error('❌ STACK TRACE:', err.stack);
+    return res.status(500).send({ error: err.message, stack: err.stack });
+    // return res.status(500).send({ err: err.message })
   }
 })
 
