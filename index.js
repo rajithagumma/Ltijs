@@ -42,7 +42,7 @@ lti.onConnect((token, req, res) => {
 });
 
 // 3. Add custom routes BEFORE deployment
-lti.app.post('/grade', lti.middleware , async (req, res) => {
+lti.app.post('/grade',  lti.middleware, async (req, res) => {
   try {
     console.log('🔹 Grade route hit');
     console.log('🔹 Request body:', req.body);
