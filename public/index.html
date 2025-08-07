@@ -79,35 +79,34 @@
       src="http://psytoolkit.gla.ac.uk/loading.gif"
     /><br />
     <script>
-     async function sendScore(score) {
-  try {
-    const ltik = new URLSearchParams(window.location.search).get('ltik');
-    if (!ltik) throw new Error("LTIK token missing from URL");
+      async function sendScore(score) {
+        try {
+          const ltik = new URLSearchParams(window.location.search).get("ltik");
+          if (!ltik) throw new Error("LTIK token missing from URL");
 
-    console.log("Sending score:", score, "with LTIK:", ltik);
+          console.log("Sending score:", score, "with LTIK:", ltik);
 
-    const response = await fetch(`/grade?ltik=${ltik}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ grade: score }),
-    });
+          const response = await fetch(`/grade?ltik=${ltik}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ grade: score }),
+          });
 
-    console.log("Response status:", response.status);
+          console.log("Response status:", response.status);
 
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
 
-    const data = await response.json();
-    console.log("✅ Score submitted successfully:", data);
-  } catch (error) {
-    console.error("❌ Error submitting score:", error);
-  }
-}
-	
-      
+          const data = await response.json();
+          console.log("✅ Score submitted successfully:", data);
+        } catch (error) {
+          console.error("❌ Error submitting score:", error);
+        }
+      }
+
       var MAXSPRITES = 100,
         MAXBITMAPS = 1e3,
         PSY_CENTRAL = -99999,
@@ -1702,7 +1701,7 @@
               var a321 = a1;
               console.log(RTfour);
               sendScore(Math.max(RTfour, RTeight));
-              
+
               // console.log(
               //   "RTfour = ",
               //   RTfour,
