@@ -42,7 +42,7 @@ lti.onConnect((token, req, res) => {
 });
 
 // 3. Add custom routes BEFORE deployment
-lti.app.post('/grade',  lti.middleware, async (req, res) => {
+lti.app.post('/grade', lti.middleware,  async (req, res) => {
   try {
     console.log('🔹 Grade route hit');
     console.log('🔹 Request body:', req.body);
@@ -105,9 +105,7 @@ lti.app.post('/grade',  lti.middleware, async (req, res) => {
     return res.send(responseGrade)
   } catch (err) {
     console.error('❌ Error in /grade route:', err);
-    console.error('❌ STACK TRACE:', err.stack);
-    return res.status(500).send({ error: err.message, stack: err.stack });
-    // return res.status(500).send({ err: err.message })
+    return res.status(500).send({ err: err.message })
   }
 })
 
