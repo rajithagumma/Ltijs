@@ -100,7 +100,7 @@
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ grade: clampedScore }),
+            body: JSON.stringify({ grade: clampedScore,comment }),
           });
 
           console.log("Response status:", response.status);

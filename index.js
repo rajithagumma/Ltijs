@@ -44,12 +44,13 @@ lti.onConnect((token, req, res) => {
 lti.app.post('/grade', async (req, res) => {
   try {
     const idtoken = res.locals.token // IdToken
-    const score = req.body.grade // User numeric score sent in the body
+    // const score = req.body.grade // User numeric score sent in the body
     // Creating Grade object
-    const comment=req.body.grade
+    const { grade, comment } = req.body;
+    // const comment=req.body.grade
     const gradeObj = {
       userId: idtoken.user,
-      scoreGiven: score,
+      scoreGiven: Number(grade),
       scoreMaximum: 10000,
       activityProgress: 'Completed',
       gradingProgress: 'FullyGraded',
