@@ -84,26 +84,39 @@
           const ltik = new URLSearchParams(window.location.search).get("ltik");
           if (!ltik) throw new Error("LTIK token missing from URL");
 
-          console.log("Sending score:", score, "with LTIK:", ltik);
+          // Ensure score is a valid number between 0 and 100
+          const numericScore = Number(score);
+          if (isNaN(numericScore)) {
+            throw new Error("Score must be a valid number");
+          }
+          
+          // Clamp score between 0 and 100
+          const clampedScore = Math.max(0, Math.min(100, numericScore));
+
+          console.log("Sending score:", clampedScore, "with LTIK:", ltik);
 
           const response = await fetch(`/grade?ltik=${ltik}`, {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ grade: score }),
+            body: JSON.stringify({ grade: clampedScore }),
           });
 
           console.log("Response status:", response.status);
 
           if (!response.ok) {
-            throw new Error("Network response was not ok");
+            const errorText = await response.text();
+            console.error("Server error response:", errorText);
+            throw new Error(`Network response was not ok: ${response.status} - ${errorText}`);
           }
 
           const data = await response.json();
           console.log("✅ Score submitted successfully:", data);
+          return data;
         } catch (error) {
           console.error("❌ Error submitting score:", error);
+          throw error;
         }
       }
 
@@ -1699,8 +1712,36 @@
               RTthirtytwo1 = a1 > 0 ? Math.round(b1 / a1) : 0;
               var a32 = a;
               var a321 = a1;
-              console.log(RTfour);
-              sendScore(Math.max(RTfour, RTeight));
+              console.log("RT values - RTfour:", RTfour, "RTeight:", RTeight);
+              
+              // Calculate a normalized score based on reaction time
+              // Lower reaction times = higher scores
+              // Assuming good reaction times are around 500-1000ms, excellent around 200-500ms
+              const maxRT = Math.max(RTfour, RTeight);
+              let normalizedScore;
+              
+              if (maxRT <= 0) {
+                // No valid reaction time recorded
+                normalizedScore = 0;
+              } else if (maxRT <= 500) {
+                // Excellent performance: 90-100 points
+                normalizedScore = Math.round(90 + (500 - maxRT) / 500 * 10);
+              } else if (maxRT <= 1000) {
+                // Good performance: 70-90 points  
+                normalizedScore = Math.round(70 + (1000 - maxRT) / 500 * 20);
+              } else if (maxRT <= 2000) {
+                // Average performance: 40-70 points
+                normalizedScore = Math.round(40 + (2000 - maxRT) / 1000 * 30);
+              } else {
+                // Poor performance: 0-40 points
+                normalizedScore = Math.max(0, Math.round(40 - (maxRT - 2000) / 1000 * 10));
+              }
+              
+              // Ensure score is within 0-100 range
+              normalizedScore = Math.max(0, Math.min(100, normalizedScore));
+              
+              console.log("Calculated score:", normalizedScore, "from RT:", maxRT);
+              sendScore(normalizedScore);
 
               // console.log(
               //   "RTfour = ",
