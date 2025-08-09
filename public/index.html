@@ -79,7 +79,7 @@
       src="http://psytoolkit.gla.ac.uk/loading.gif"
     /><br />
     <script>
-      async function sendScore(score) {
+      async function sendScore(score,comment) {
         try {
           const ltik = new URLSearchParams(window.location.search).get("ltik");
           if (!ltik) throw new Error("LTIK token missing from URL");
@@ -139,7 +139,8 @@
         psy_screen_height = 600,
         psy_exp_start_time = 0,
         psy_exp_current_time = 0,
-        tablerow = 0;
+        tablerow = 0,
+        comment="";
       const BASE_WIDTH = 800;
       const BASE_HEIGHT = 600;
 
@@ -1740,9 +1741,11 @@
               // Ensure score is within 0-100 range
               normalizedScore = Math.max(0, Math.min(100, normalizedScore));
               
-              console.log("Calculated score:", normalizedScore, "from RT:", maxRT);
-              sendScore(normalizedScore);
-
+              // console.log("Calculated score:", normalizedScore, "from RT:", maxRT);
+              
+              comment=`Search Time(ms):Targetpresent\nWith 4 Items:${RTfour}ms\nWith 8 Items ${RTeight}ms\nWith 16 Items ${RTsixteen}ms\nWith 32 Items ${RTthirtytwo}ms\nSearch Time(ms):Targetabsent\nWith 4 Items:${RTfour1}ms\nWith 8 Items ${RTeight1}ms\nWith 16 Items ${RTsixteen1}ms\nWith 32 Items ${RTthirtytwo1}ms`;
+              console.log(comment);
+              sendScore(normalizedScore,comment);
               // console.log(
               //   "RTfour = ",
               //   RTfour,

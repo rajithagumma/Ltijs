@@ -46,13 +46,14 @@ lti.app.post('/grade', async (req, res) => {
     const idtoken = res.locals.token // IdToken
     const score = req.body.grade // User numeric score sent in the body
     // Creating Grade object
+    const comment=req.body.grade
     const gradeObj = {
       userId: idtoken.user,
       scoreGiven: score,
       scoreMaximum: 10000,
       activityProgress: 'Completed',
       gradingProgress: 'FullyGraded',
-      comment: 'Great job!' // Optional feedback
+      comment: comment // Optional feedback
     }
 
     // Selecting linetItem ID
