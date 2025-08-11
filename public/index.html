@@ -1168,11 +1168,11 @@
               case 6:
                 task_search.step++;
                 if (current_block === "block_practice_trials") {
-                  psy_add_centered_bitmap_db(tryagain, 0, 220);
+                  psy_add_centered_bitmap_db(tryagain, 0, 200);
                   task_search.practice_count--;
                   block_practice_trials.trial_counter--;
                 } else {
-                  psy_add_centered_bitmap_db(therewasnone, 0, 220);
+                  psy_add_centered_bitmap_db(therewasnone, 0, 200);
                 }
                 psy_draw_all_db();
                 psy_delay(2e3);
@@ -1185,6 +1185,8 @@
                 if (current_block === "block_practice_trials") {
                   psy_clear_stimuli1(2);
                   psy_clear_stimuli1(35);
+                }else{
+                  psy_clear_stimuli1(34);
                 }
                 break;
               case 8:
