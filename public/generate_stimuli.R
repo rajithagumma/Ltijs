@@ -19,7 +19,7 @@ counter = function() {
 all_trials = list()
 
 # Set of sizes
-j = 7
+j = 4
 
 for (setsize in c(4, 8, 16, 32)) {
 
@@ -77,4 +77,4 @@ for (setsize in c(4, 8, 16, 32)) {
 json_output = toJSON(all_trials, pretty = TRUE, auto_unbox = TRUE)
 
 # Write to file
-write(json_output, file = "stimuli_output.json")
+write(json_output, file = "stimuli_output3.json")
