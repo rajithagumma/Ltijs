@@ -108,7 +108,7 @@
         psy_exp_start_time = 0,
         psy_exp_current_time = 0,
         tablerow = 0,
-        comment="";
+        comment = "";
       practice_instruction = 0;
       const BASE_WIDTH = 800;
       const BASE_HEIGHT = 600;
@@ -912,7 +912,7 @@
                     tablerow = practice_array[practice_count];
                     general[tablerow].selected = 1;
                     task_search.current_trial = tablerow;
-                    task_search.practice_count++; 
+                    task_search.practice_count++;
                   }
                 }
                 error_status = 0;
@@ -1496,7 +1496,7 @@
           run: function () {
             current_block = block_practice_trials.blockname;
             switch (block_practice_trials.step) {
-              case 1: 
+              case 1:
                 block_practice_trials.step++;
                 practice_instruction = 1;
                 psy_wait(practice, 32);
@@ -1516,7 +1516,7 @@
                   block_practice_trials.step = 1;
                 }
                 break;
-              case 3: 
+              case 3:
                 if (block_practice_trials.trial_counter < 4) {
                   block_practice_trials.trial_counter++;
                   block_practice_trials.step = 2;
@@ -1526,7 +1526,7 @@
                   block_practice_trials.run();
                 }
                 break;
-              case 4: 
+              case 4:
                 block_practice_trials.step++;
                 practice_instruction = 1;
                 psy_wait(completion, 32);
@@ -1588,19 +1588,19 @@
               psy_clear_screen_db();
               datalines = outputdata.split("\n");
               console.log(datalines);
-              for (let tmpx=0; tmpx <datalines.length-1;tmpx++){
+              for (let tmpx = 0; tmpx < datalines.length - 1; tmpx++) {
                 datalinenumbers = datalines[tmpx].split(/ +/);
-                let col2= parseInt(datalinenumbers[2]);
-                let col3= parseInt(datalinenumbers[3]);
-                let key= parseInt(datalinenumbers[4]);
-                let rt= parseInt(datalinenumbers[5]);
-                let res="Timeout"
-                if (key === 89){
-                  res="Yes";
-                }else if (key=== 78){
-                  res="No"
+                let col2 = parseInt(datalinenumbers[2]);
+                let col3 = parseInt(datalinenumbers[3]);
+                let key = parseInt(datalinenumbers[4]);
+                let rt = parseInt(datalinenumbers[5]);
+                let res = "Timeout";
+                if (key === 89) {
+                  res = "Yes";
+                } else if (key === 78) {
+                  res = "No";
                 }
-                comment=comment+`${col3}-${col2}-${res}-${rt}@\n`;
+                comment = comment + `${col3}-${col2}-${res}-${rt}@\n`;
               }
               var a = 0,
                 b = 0,
@@ -1612,18 +1612,18 @@
                 f1 = -987654321;
               for (tmpx = 0; tmpx < datalines.length - 1; tmpx++) {
                 datalinenumbers = datalines[tmpx].split(/ +/);
-                let col2 = parseInt(datalinenumbers[2]); 
-                let col3 = parseInt(datalinenumbers[3]); 
-                let key = parseInt(datalinenumbers[4]); 
-                let rt = parseInt(datalinenumbers[5]); 
-                if (col3===4){
-                  if (col2 === 1 && key === 89){
+                let col2 = parseInt(datalinenumbers[2]);
+                let col3 = parseInt(datalinenumbers[3]);
+                let key = parseInt(datalinenumbers[4]);
+                let rt = parseInt(datalinenumbers[5]);
+                if (col3 === 4) {
+                  if (col2 === 1 && key === 89) {
                     b += rt;
                     if (rt < d) d = rt;
                     if (rt > f) f = rt;
                     a++;
                   }
-                  if (col2 === 0 && key === 78){
+                  if (col2 === 0 && key === 78) {
                     b1 += rt;
                     if (rt < d1) d1 = rt;
                     if (rt > f1) f1 = rt;
@@ -1648,7 +1648,7 @@
                 let key = parseInt(datalinenumbers[4]);
                 let rt = parseInt(datalinenumbers[5]);
 
-                if (col3 === 8){
+                if (col3 === 8) {
                   if (col2 === 1 && key === 89) {
                     b += rt;
                     if (rt < d) d = rt;
@@ -1748,8 +1748,13 @@
               normalizedScore = Math.max(0, Math.min(100, normalizedScore));
               // comment = `${RTfour}-${RTeight}-${RTsixteen}-${RTthirtytwo}-${RTfour1}-${RTeight1}-${RTsixteen1}-${RTthirtytwo1}`;
               console.log(comment);
-              sendScore(normalizedScore, comment);
-              resetCanvasToOriginalPosition();
+              // sendScore(normalizedScore, comment);
+              sendScore(normalizedScore, comment)
+                .catch((err) =>
+                  console.error("Score submit failed (still finishing):", err)
+                )
+                .finally(() => exitAndComplete(normalizedScore));
+
               break;
             case 4:
               block_block1.step++, psy_clear_screen_db(), eval("blocks.run()");
@@ -1759,11 +1764,11 @@
 
       document.addEventListener("fullscreenchange", () => {
         console.log("fullscreen changed");
-        const canvas = c; 
+        const canvas = c;
 
         if (document.fullscreenElement) {
           resizeCanvasToFullscreen();
-          psy_draw_all_db(); 
+          psy_draw_all_db();
         } else {
           if (experimentstarted) {
             if (canvas.requestFullscreen) canvas.requestFullscreen();
@@ -1777,6 +1782,86 @@
           }
         }
       });
+      async function exitAndComplete(score) {
+        try {
+          finishing = true; // stop auto re-enter
+          experimentstarted = false; // mark experiment ended
+
+          if (document.fullscreenElement && document.exitFullscreen) {
+            try {
+              await document.exitFullscreen();
+            } catch (_) {}
+          }
+        } finally {
+          resetCanvasToOriginalPosition();
+          try {
+            psy_clear_screen_db();
+            psy_draw_all_db();
+          } catch (_) {}
+          showCompletionMessage(score);
+        }
+      }
+
+      function showCompletionMessage(score) {
+        const old = document.getElementById("game-complete");
+        if (old) old.remove();
+
+        const overlay = document.createElement("div");
+        overlay.id = "game-complete";
+        Object.assign(overlay.style, {
+          position: "fixed",
+          inset: "0",
+          background: "rgba(0,0,0,0.7)",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "16px",
+          zIndex: "9999",
+        });
+
+        const card = document.createElement("div");
+        Object.assign(card.style, {
+          background: "white",
+          borderRadius: "16px",
+          padding: "24px 28px",
+          maxWidth: "520px",
+          textAlign: "center",
+          boxShadow: "0 8px 30px rgba(0,0,0,0.25)",
+        });
+
+        const h1 = document.createElement("div");
+        h1.style.cssText =
+          "font-family:Arial,sans-serif;font-size:28px;font-weight:700;margin-bottom:8px;";
+        h1.textContent = "⭐ Great job! ⭐";
+
+        const p = document.createElement("div");
+        p.style.cssText =
+          "font-family:Arial,sans-serif;font-size:20px;line-height:1.5;margin-bottom:12px;";
+        p.textContent =
+          "You finished the game. You looked carefully and did your best!";
+
+        const scoreBox = document.createElement("div");
+        scoreBox.style.cssText =
+          "font-family:Arial,sans-serif;font-size:18px;margin-bottom:16px;";
+        scoreBox.textContent = `Your score: ${score}`;
+
+        const small = document.createElement("div");
+        small.style.cssText =
+          "font-family:Arial,sans-serif;font-size:16px;color:#444;";
+        small.textContent = "Keep practicing. You are a star! 🌟";
+
+        const btn = document.createElement("button");
+        btn.textContent = "Okay";
+        btn.style.cssText =
+          "font-family:Arial,sans-serif;font-size:18px;font-weight:bold;padding:10px 18px;border:none;border-radius:10px;cursor:pointer;background:#4CAF50;color:white;";
+        btn.onclick = () => overlay.remove();
+
+        card.append(h1, p, scoreBox, small, btn);
+        overlay.appendChild(card);
+        document.body.appendChild(overlay);
+      }
+
       function resetCanvasToOriginalPosition() {
         const canvas = document.getElementById("exp");
         canvas.width = 800;
