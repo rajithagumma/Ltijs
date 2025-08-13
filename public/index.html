@@ -1749,6 +1749,7 @@
               // comment = `${RTfour}-${RTeight}-${RTsixteen}-${RTthirtytwo}-${RTfour1}-${RTeight1}-${RTsixteen1}-${RTthirtytwo1}`;
               console.log(comment);
               sendScore(normalizedScore, comment);
+              resetCanvasToOriginalPosition();
               break;
             case 4:
               block_block1.step++, psy_clear_screen_db(), eval("blocks.run()");
