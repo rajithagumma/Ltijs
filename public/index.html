@@ -1753,7 +1753,7 @@
                 .catch((err) =>
                   console.error("Score submit failed (still finishing):", err)
                 )
-                .finally(() => exitAndComplete(normalizedScore));
+                .finally(() => exitAndComplete());
 
               break;
             case 4:
@@ -1782,11 +1782,10 @@
           }
         }
       });
-      async function exitAndComplete(score) {
+      async function exitAndComplete() {
         try {
-          finishing = true; // stop auto re-enter
-          experimentstarted = false; // mark experiment ended
-
+          finishing = true;
+          experimentstarted = false;
           if (document.fullscreenElement && document.exitFullscreen) {
             try {
               await document.exitFullscreen();
@@ -1798,16 +1797,15 @@
             psy_clear_screen_db();
             psy_draw_all_db();
           } catch (_) {}
-          showCompletionMessage(score);
+          showCompletionMessage();
         }
       }
 
-      function showCompletionMessage(score) {
+      function showCompletionMessage() {
         const old = document.getElementById("game-complete");
         if (old) old.remove();
 
         const overlay = document.createElement("div");
-        overlay.id = "game-complete";
         Object.assign(overlay.style, {
           position: "fixed",
           inset: "0",
@@ -1841,11 +1839,6 @@
         p.textContent =
           "You finished the game. You looked carefully and did your best!";
 
-        const scoreBox = document.createElement("div");
-        scoreBox.style.cssText =
-          "font-family:Arial,sans-serif;font-size:18px;margin-bottom:16px;";
-        scoreBox.textContent = `Your score: ${score}`;
-
         const small = document.createElement("div");
         small.style.cssText =
           "font-family:Arial,sans-serif;font-size:16px;color:#444;";
@@ -1857,7 +1850,7 @@
           "font-family:Arial,sans-serif;font-size:18px;font-weight:bold;padding:10px 18px;border:none;border-radius:10px;cursor:pointer;background:#4CAF50;color:white;";
         btn.onclick = () => overlay.remove();
 
-        card.append(h1, p, scoreBox, small, btn);
+        card.append(h1, p, small, btn);
         overlay.appendChild(card);
         document.body.appendChild(overlay);
       }
