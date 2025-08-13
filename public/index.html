@@ -107,7 +107,8 @@
         psy_screen_height = 600,
         psy_exp_start_time = 0,
         psy_exp_current_time = 0,
-        tablerow = 0;
+        tablerow = 0,
+        comment="";
       practice_instruction = 0;
       const BASE_WIDTH = 800;
       const BASE_HEIGHT = 600;
@@ -155,7 +156,7 @@
         img.onload = function () {
           psy_bitmaps[bmp_number] = img;
           bmp_number++;
-          if (callback) callback(); 
+          if (callback) callback();
         };
         img.src = src;
       }
@@ -200,7 +201,7 @@
         if (possiblekeys.length === 1) {
           psy_readkey.expectedkey = possiblekeys[0];
         } else {
-          psy_readkey.expectedkey = null; 
+          psy_readkey.expectedkey = null;
         }
         psy_readkey.start(current_task, f);
       }
@@ -287,7 +288,6 @@
               psy_readkey.stop();
             } else {
               inkeypress--;
-              
             }
           }
         }
@@ -617,7 +617,6 @@
           scaledWidth = bmp.width * scale;
           scaledHeight = bmp.height * scale;
         }
-        console.log(bmp.width, bmp.height);
         let x =
           b === PSY_CENTRAL
             ? psy_screen_center_x - scaledWidth / 2
@@ -840,7 +839,7 @@
         this.selected = args[99]; // selected
       }
 
-      fetch("stimuli_output2.json")
+      fetch("stimuli_output3.json")
         .then((response) => response.json())
         .then((data) => {
           general = data.map((entry) => new generaltype(...entry));
@@ -851,7 +850,11 @@
         .catch((error) => {
           console.error("Error loading JSON:", error);
         });
-
+      let available_trials = [
+        0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19, 20, 21, 22,
+        23, 24, 25, 26,
+      ];
+      let countoftrails = 0;
       (selectedoncecount = [0, 0]),
         (task_search = {
           step: 1,
@@ -872,54 +875,55 @@
               case 1:
                 task_search.step++;
                 task_search.trial_selection == TRIAL_SELECTION_RANDOM &&
-                  ((tablerow = psy_random(0, 55)),
+                  ((tablerow = psy_random(0, 27)),
                   (task_search.current_trial = tablerow));
                 task_search.trial_selection == TRIAL_SELECTION_FIXED_SEQUENCE &&
                   (task_search.current_trial++,
-                  56 == task_search.current_trial &&
+                  28 == task_search.current_trial &&
                     (task_search.current_trial = 0),
                   (tablerow = task_search.current_trial));
                 task_search.trial_selection ==
                   TRIAL_SELECTION_REPEAT_ON_ERROR &&
                   (0 != error_status && -1 != task_search.current_trial
                     ? (tablerow = task_search.current_trial)
-                    : ((tablerow = psy_random(0, 55)),
+                    : ((tablerow = psy_random(0, 27)),
                       (task_search.current_trial = tablerow)));
                 if (task_search.trial_selection == TRIAL_SELECTION_ONCE) {
-                  if (56 == selectedoncecount[task_search.tasknumber]) {
-                    for (tmptr = 0; 56 > tmptr; tmptr++)
-                      general[tmptr].selected = 0;
+                  if (countoftrails == 0) {
+                    available_trials = [
+                      0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14, 16, 17, 18, 19,
+                      20, 21, 22, 23, 24, 25, 26,
+                    ];
+                  }
+                  if (available_trials.length === 0) {
                     selectedoncecount[task_search.tasknumber] = 0;
                   }
-                  for (
-                    tablerow = psy_random(0, 55);
-                    1 == general[tablerow].selected;
-
-                  )
-                    tablerow = psy_random(0, 55);
+                  const r = Math.floor(Math.random() * available_trials.length);
+                  tablerow = available_trials.splice(r, 1)[0];
                   task_search.current_trial = tablerow;
                   selectedoncecount[task_search.tasknumber]++;
                   general[tablerow].selected = 1;
                 }
                 if (task_search.trial_selection == PRACTICE_TRIALS) {
-                  let practice_array = [32, 24, 53, 6];
+                  let practice_array = [15, 12, 27, 3];
                   let practice_count = task_search.practice_count;
 
                   if (practice_count < practice_array.length) {
                     tablerow = practice_array[practice_count];
                     general[tablerow].selected = 1;
                     task_search.current_trial = tablerow;
-                    task_search.practice_count++; // increment global count
+                    task_search.practice_count++; 
                   }
                 }
                 error_status = 0;
                 possiblekeys = [32];
                 psy_add_centered_bitmap_db(fixpoint, PSY_CENTRAL, PSY_CENTRAL);
+                if (current_block == "block_block1") {
+                  countoftrails = countoftrails + 1;
+                }
                 psy_draw_all_db();
                 psy_delay(100);
-
                 break;
-
               case 2:
                 task_search.step++;
                 psy_clear_stimuli1(1);
@@ -1107,7 +1111,11 @@
                       general[tablerow].c5,
                       general[tablerow].c6
                     );
-                    psy_add_centered_bitmap_db(target,general[tablerow].c5,general[tablerow].c6);
+                    psy_add_centered_bitmap_db(
+                      target,
+                      general[tablerow].c5,
+                      general[tablerow].c6
+                    );
                   }
                 }
                 psy_draw_all_db();
@@ -1358,7 +1366,6 @@
                 break;
               case 21:
                 task_search.step++;
-                // psy_clear_stimuli1(2);
                 psy_add_centered_bitmap_db(mask1, PSY_CENTRAL, PSY_CENTRAL);
                 psy_draw_all_db();
                 psy_delay(100);
@@ -1489,7 +1496,7 @@
           run: function () {
             current_block = block_practice_trials.blockname;
             switch (block_practice_trials.step) {
-              case 1: // Show intro image for 4 seconds
+              case 1: 
                 block_practice_trials.step++;
                 practice_instruction = 1;
                 psy_wait(practice, 32);
@@ -1509,9 +1516,7 @@
                   block_practice_trials.step = 1;
                 }
                 break;
-
-              case 3: // Repeat for 4 practice trials
-                console.log(block_practice_trials.step);
+              case 3: 
                 if (block_practice_trials.trial_counter < 4) {
                   block_practice_trials.trial_counter++;
                   block_practice_trials.step = 2;
@@ -1521,14 +1526,12 @@
                   block_practice_trials.run();
                 }
                 break;
-
-              case 4: // Show end image for 4 seconds
+              case 4: 
                 block_practice_trials.step++;
                 practice_instruction = 1;
                 psy_wait(completion, 32);
                 break;
-
-              case 5: // Proceed to actual test block
+              case 5:
                 if (keystatus.status === 1) {
                   block_practice_trials.step++;
                   eval("blocks.run()");
@@ -1552,7 +1555,7 @@
         start: function () {
           block_block1.step = 1;
           current_task = "block_block1";
-          block_block1.trial_counter_per_task[0] = 25;
+          block_block1.trial_counter_per_task[0] = 24;
           psy_clear_stimulus_counters_db();
           block_block1.run();
         },
@@ -1584,8 +1587,21 @@
               block_block1.step++;
               psy_clear_screen_db();
               datalines = outputdata.split("\n");
-
-              // For Task 4
+              console.log(datalines);
+              for (let tmpx=0; tmpx <datalines.length-1;tmpx++){
+                datalinenumbers = datalines[tmpx].split(/ +/);
+                let col2= parseInt(datalinenumbers[2]);
+                let col3= parseInt(datalinenumbers[3]);
+                let key= parseInt(datalinenumbers[4]);
+                let rt= parseInt(datalinenumbers[5]);
+                let res="Timeout"
+                if (key === 89){
+                  res="Yes";
+                }else if (key=== 78){
+                  res="No"
+                }
+                comment=comment+`${col3}-${col2}-${res}-${rt}@\n`;
+              }
               var a = 0,
                 b = 0,
                 d = 987654321,
@@ -1596,19 +1612,18 @@
                 f1 = -987654321;
               for (tmpx = 0; tmpx < datalines.length - 1; tmpx++) {
                 datalinenumbers = datalines[tmpx].split(/ +/);
-                let col2 = parseInt(datalinenumbers[2]); // target presence
-                let col3 = parseInt(datalinenumbers[3]); // task type
-                let key = parseInt(datalinenumbers[4]); // key pressed
-                let rt = parseInt(datalinenumbers[5]); // reaction time
-
-                if (col3 === 4) {
-                  if (col2 === 1 && key === 89) {
+                let col2 = parseInt(datalinenumbers[2]); 
+                let col3 = parseInt(datalinenumbers[3]); 
+                let key = parseInt(datalinenumbers[4]); 
+                let rt = parseInt(datalinenumbers[5]); 
+                if (col3===4){
+                  if (col2 === 1 && key === 89){
                     b += rt;
                     if (rt < d) d = rt;
                     if (rt > f) f = rt;
                     a++;
                   }
-                  if (col2 === 0 && key === 78) {
+                  if (col2 === 0 && key === 78){
                     b1 += rt;
                     if (rt < d1) d1 = rt;
                     if (rt > f1) f1 = rt;
@@ -1633,7 +1648,7 @@
                 let key = parseInt(datalinenumbers[4]);
                 let rt = parseInt(datalinenumbers[5]);
 
-                if (col3 === 8) {
+                if (col3 === 8){
                   if (col2 === 1 && key === 89) {
                     b += rt;
                     if (rt < d) d = rt;
@@ -1717,220 +1732,48 @@
               let normalizedScore;
 
               if (maxRT <= 0) {
-                // No valid reaction time recorded
                 normalizedScore = 0;
               } else if (maxRT <= 500) {
-                // Excellent performance: 90-100 points
                 normalizedScore = Math.round(90 + ((500 - maxRT) / 500) * 10);
               } else if (maxRT <= 1000) {
-                // Good performance: 70-90 points
                 normalizedScore = Math.round(70 + ((1000 - maxRT) / 500) * 20);
               } else if (maxRT <= 2000) {
-                // Average performance: 40-70 points
                 normalizedScore = Math.round(40 + ((2000 - maxRT) / 1000) * 30);
               } else {
-                // Poor performance: 0-40 points
                 normalizedScore = Math.max(
                   0,
                   Math.round(40 - ((maxRT - 2000) / 1000) * 10)
                 );
               }
-
-              // Ensure score is within 0-100 range
               normalizedScore = Math.max(0, Math.min(100, normalizedScore));
-
-              // console.log("Calculated score:", normalizedScore, "from RT:", maxRT);
-
-              comment = `${RTfour}-${RTeight}-${RTsixteen}-${RTthirtytwo}-${RTfour1}-${RTeight1}-${RTsixteen1}-${RTthirtytwo1}`;
+              // comment = `${RTfour}-${RTeight}-${RTsixteen}-${RTthirtytwo}-${RTfour1}-${RTeight1}-${RTsixteen1}-${RTthirtytwo1}`;
               console.log(comment);
               sendScore(normalizedScore, comment);
-
-              psy_add_text_rgb_db(
-                0,
-                0,
-                -250,
-                PSY_CENTRAL,
-                PSY_CENTRAL,
-                255,
-                255,
-                255,
-                "Search time (ms): Target present"
-              );
-              psy_draw_all_db();
-              tmptext = "With  4 items: " + RTfour + " ms";
-              psy_add_text_rgb_db(
-                0,
-                0,
-                -200,
-                PSY_CENTRAL,
-                PSY_CENTRAL,
-                255,
-                255,
-                255,
-                tmptext
-              );
-              psy_draw_all_db();
-              tmptext = "With 8 items: " + RTeight + " ms";
-              psy_add_text_rgb_db(
-                0,
-                0,
-                -150,
-                PSY_CENTRAL,
-                PSY_CENTRAL,
-                255,
-                255,
-                255,
-                tmptext
-              );
-              psy_draw_all_db();
-              tmptext = "With 16 items: " + RTsixteen + " ms";
-              psy_add_text_rgb_db(
-                0,
-                0,
-                -100,
-                PSY_CENTRAL,
-                PSY_CENTRAL,
-                255,
-                255,
-                255,
-                tmptext
-              );
-              psy_draw_all_db();
-              tmptext = "With 32 items: " + RTthirtytwo + " ms";
-              psy_add_text_rgb_db(
-                0,
-                0,
-                -50,
-                PSY_CENTRAL,
-                PSY_CENTRAL,
-                255,
-                255,
-                255,
-                tmptext
-              );
-              psy_draw_all_db();
-              psy_add_text_rgb_db(
-                0,
-                0,
-                0,
-                PSY_CENTRAL,
-                PSY_CENTRAL,
-                255,
-                255,
-                255,
-                "Search time (ms): Target absent"
-              );
-              psy_draw_all_db();
-              tmptext = "With  4 items: " + RTfour1 + " ms";
-              psy_add_text_rgb_db(
-                0,
-                0,
-                50,
-                PSY_CENTRAL,
-                PSY_CENTRAL,
-                255,
-                255,
-                255,
-                tmptext
-              );
-              psy_draw_all_db();
-              tmptext = "With 8 items: " + RTeight1 + " ms";
-              psy_add_text_rgb_db(
-                0,
-                0,
-                100,
-                PSY_CENTRAL,
-                PSY_CENTRAL,
-                255,
-                255,
-                255,
-                tmptext
-              );
-              psy_draw_all_db();
-              tmptext = "With 16 items: " + RTsixteen1 + " ms";
-              psy_add_text_rgb_db(
-                0,
-                0,
-                150,
-                PSY_CENTRAL,
-                PSY_CENTRAL,
-                255,
-                255,
-                255,
-                tmptext
-              );
-              psy_draw_all_db();
-              tmptext = "With 32 items: " + RTthirtytwo1 + " ms";
-              psy_add_text_rgb_db(
-                0,
-                0,
-                200,
-                PSY_CENTRAL,
-                PSY_CENTRAL,
-                255,
-                255,
-                255,
-                tmptext
-              );
-              psy_draw_all_db();
-              psy_add_text_rgb_db(
-                0,
-                0,
-                250,
-                PSY_CENTRAL,
-                PSY_CENTRAL,
-                255,
-                255,
-                255,
-                "Press space bar to continue"
-              );
-              psy_add_text_rgb_db(
-                0,
-                0,
-                250,
-                PSY_CENTRAL,
-                PSY_CENTRAL,
-                255,
-                255,
-                255,
-                "Press space bar to continue"
-              );
-              psy_draw_all_db();
-              psy_wait(0, 0);
               break;
             case 4:
               block_block1.step++, psy_clear_screen_db(), eval("blocks.run()");
           }
         },
       };
-      let experimentFinished = false;
-      document.addEventListener("fullscreenchange", () => {
-        consloe.log("fullscreen changed");
-        if (!document.fullscreenElement) {
-          if (!experimentstarted) {
-            // Experiment NOT started: force fullscreen again
-            if (canvas.requestFullscreen) {
-              canvas.requestFullscreen();
-            } else if (canvas.webkitRequestFullscreen) {
-              canvas.webkitRequestFullscreen();
-            } else if (canvas.mozRequestFullScreen) {
-              canvas.mozRequestFullScreen();
-            } else if (canvas.msRequestFullscreen) {
-              canvas.msRequestFullscreen();
-            }
-          }
-          // resetCanvasToOriginalPosition();
-          // if (current_block==="block_messagenumber1"){
-          //   psy_wait(aims,32);
-          // }else if (current_block=="block_block1" || current_block=="block_practice_trials"){
-          //   task_search.step=3;
-          //   task_search.run();
 
-          // }else{
-          //   psy_draw_all_db();
-          // }
-        } else {
+      document.addEventListener("fullscreenchange", () => {
+        console.log("fullscreen changed");
+        const canvas = c; 
+
+        if (document.fullscreenElement) {
           resizeCanvasToFullscreen();
+          psy_draw_all_db(); 
+        } else {
+          if (experimentstarted) {
+            if (canvas.requestFullscreen) canvas.requestFullscreen();
+            else if (canvas.webkitRequestFullscreen)
+              canvas.webkitRequestFullscreen();
+            else if (canvas.mozRequestFullScreen) canvas.mozRequestFullScreen();
+            else if (canvas.msRequestFullscreen) canvas.msRequestFullscreen();
+          } else {
+            resetCanvasToOriginalPosition();
+            psy_draw_all_db();
+          }
         }
       });
       function resetCanvasToOriginalPosition() {
